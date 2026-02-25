@@ -715,6 +715,10 @@ class TapPostgres(SQLTap):
         Returns:
             List of discovered Stream objects.
         """
+        # Access connector first to ensure connection_parameters is initialized.
+        # connection_parameters is set as a side effect of the connector property.
+        connector = self.connector
+
         streams: list[SQLStream] = []
         for catalog_entry in self.catalog_dict["streams"]:
             if catalog_entry["replication_method"] == "LOG_BASED":
@@ -723,9 +727,9 @@ class TapPostgres(SQLTap):
                         self,
                         catalog_entry,
                         connection_parameters=self.connection_parameters,
-                        connector=self.connector,
+                        connector=connector,
                     )
                 )
             else:
-                streams.append(PostgresStream(self, catalog_entry, connector=self.connector))
+                streams.append(PostgresStream(self, catalog_entry, connector=connector))
         return streams
